@@ -334,7 +334,7 @@ async function loadUserPicks() {
     const username = getUsername();
 
     try {
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
             .from('picks')
             .select('picks')
             .eq('username', username)
@@ -402,7 +402,7 @@ async function savePicks() {
 
     try {
         // Check if user already exists
-        const { data: existing } = await supabase
+        const { data: existing } = await supabaseClient
             .from('picks')
             .select('id')
             .eq('username', username)
@@ -411,7 +411,7 @@ async function savePicks() {
         let result;
         if (existing) {
             // Update existing record
-            result = await supabase
+            result = await supabaseClient
                 .from('picks')
                 .update({
                     picks: userPicks,
@@ -420,7 +420,7 @@ async function savePicks() {
                 .eq('username', username);
         } else {
             // Insert new record
-            result = await supabase
+            result = await supabaseClient
                 .from('picks')
                 .insert({
                     username: username,
@@ -448,7 +448,7 @@ async function viewAllPredictions() {
     resultsContent.innerHTML = '<p>Loading predictions...</p>';
 
     try {
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
             .from('picks')
             .select('username, display_name, picks')
             .order('created_at', { ascending: true });
