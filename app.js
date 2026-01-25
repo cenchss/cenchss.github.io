@@ -1,3 +1,16 @@
+// Check if user is logged in
+const loggedInUser = sessionStorage.getItem('loggedInUser');
+if (!loggedInUser) {
+    window.location.href = 'login.html';
+}
+
+// Display names for users (capitalize first letter)
+const DISPLAY_NAMES = {
+    'admin': 'Admin',
+    'dhruva': 'Dhruva',
+    'druv': 'Druv'
+};
+
 // All the bets data
 const BETS = [
     {
@@ -190,11 +203,21 @@ const BETS = [
 // Current user's picks
 let userPicks = {};
 
+// Get current username
+function getUsername() {
+    return loggedInUser;
+}
+
+// Get display name
+function getDisplayName() {
+    return DISPLAY_NAMES[loggedInUser] || loggedInUser;
+}
+
 // DOM Elements
 const betsContainer = document.getElementById('betsContainer');
-const usernameInput = document.getElementById('username');
+const displayNameEl = document.getElementById('displayName');
+const logoutBtn = document.getElementById('logoutBtn');
 const savePicksBtn = document.getElementById('savePicks');
-const loadPicksBtn = document.getElementById('loadPicks');
 const viewResultsBtn = document.getElementById('viewResults');
 const resultsModal = document.getElementById('resultsModal');
 const resultsContent = document.getElementById('resultsContent');
@@ -202,9 +225,12 @@ const closeModal = document.querySelector('.close');
 
 // Initialize the app
 function init() {
+    // Set display name
+    displayNameEl.textContent = getDisplayName();
+
     renderBets();
     setupEventListeners();
-    loadFromLocalStorage();
+    loadUserPicks();
 }
 
 // Render all bets
@@ -252,11 +278,11 @@ function setupEventListeners() {
     // Save picks
     savePicksBtn.addEventListener('click', savePicks);
 
-    // Load picks
-    loadPicksBtn.addEventListener('click', loadPicks);
-
     // View results
     viewResultsBtn.addEventListener('click', viewAllPredictions);
+
+    // Logout
+    logoutBtn.addEventListener('click', logout);
 
     // Close modal
     closeModal.addEventListener('click', () => {
@@ -268,6 +294,12 @@ function setupEventListeners() {
             resultsModal.classList.add('hidden');
         }
     });
+}
+
+// Logout function
+function logout() {
+    sessionStorage.removeItem('loggedInUser');
+    window.location.href = 'login.html';
 }
 
 // Select a pick
@@ -293,26 +325,44 @@ function selectPick(betId, pick, optionClass) {
 
 // Save to localStorage
 function saveToLocalStorage() {
-    const username = usernameInput.value.trim();
-    if (username) {
-        localStorage.setItem(`picks_${username}`, JSON.stringify(userPicks));
-    }
-    localStorage.setItem('lastPicks', JSON.stringify(userPicks));
-    localStorage.setItem('lastUsername', usernameInput.value);
+    const username = getUsername();
+    localStorage.setItem(`picks_${username}`, JSON.stringify(userPicks));
 }
 
-// Load from localStorage
-function loadFromLocalStorage() {
-    const lastUsername = localStorage.getItem('lastUsername');
-    const lastPicks = localStorage.getItem('lastPicks');
+// Load user picks on init
+async function loadUserPicks() {
+    const username = getUsername();
 
-    if (lastUsername) {
-        usernameInput.value = lastUsername;
-    }
+    try {
+        const { data, error } = await supabase
+            .from('picks')
+            .select('picks')
+            .eq('username', username)
+            .single();
 
-    if (lastPicks) {
-        userPicks = JSON.parse(lastPicks);
-        applyPicksToUI();
+        if (error && error.code !== 'PGRST116') {
+            throw error;
+        }
+
+        if (data && data.picks) {
+            userPicks = data.picks;
+            applyPicksToUI();
+        } else {
+            // Try localStorage
+            const localPicks = localStorage.getItem(`picks_${username}`);
+            if (localPicks) {
+                userPicks = JSON.parse(localPicks);
+                applyPicksToUI();
+            }
+        }
+    } catch (error) {
+        console.error('Error loading picks:', error);
+        // Fallback to localStorage
+        const localPicks = localStorage.getItem(`picks_${username}`);
+        if (localPicks) {
+            userPicks = JSON.parse(localPicks);
+            applyPicksToUI();
+        }
     }
 }
 
@@ -342,13 +392,8 @@ function applyPicksToUI() {
 
 // Save picks to Supabase
 async function savePicks() {
-    const username = usernameInput.value.trim();
-
-    if (!username) {
-        showToast('Please enter your name first!', 'error');
-        usernameInput.focus();
-        return;
-    }
+    const username = getUsername();
+    const displayName = getDisplayName();
 
     if (Object.keys(userPicks).length === 0) {
         showToast('Please make at least one pick!', 'error');
@@ -360,7 +405,7 @@ async function savePicks() {
         const { data: existing } = await supabase
             .from('picks')
             .select('id')
-            .eq('username', username.toLowerCase())
+            .eq('username', username)
             .single();
 
         let result;
@@ -372,14 +417,14 @@ async function savePicks() {
                     picks: userPicks,
                     updated_at: new Date().toISOString()
                 })
-                .eq('username', username.toLowerCase());
+                .eq('username', username);
         } else {
             // Insert new record
             result = await supabase
                 .from('picks')
                 .insert({
-                    username: username.toLowerCase(),
-                    display_name: username,
+                    username: username,
+                    display_name: displayName,
                     picks: userPicks
                 });
         }
@@ -394,58 +439,6 @@ async function savePicks() {
         console.error('Error saving to Supabase:', error);
         saveToLocalStorage();
         showToast('Saved locally (database error)', 'success');
-    }
-}
-
-// Load picks from Supabase
-async function loadPicks() {
-    const username = usernameInput.value.trim();
-
-    if (!username) {
-        showToast('Please enter your name first!', 'error');
-        usernameInput.focus();
-        return;
-    }
-
-    try {
-        const { data, error } = await supabase
-            .from('picks')
-            .select('picks, display_name')
-            .eq('username', username.toLowerCase())
-            .single();
-
-        if (error && error.code !== 'PGRST116') {
-            throw error;
-        }
-
-        if (data && data.picks) {
-            userPicks = data.picks;
-            applyPicksToUI();
-            showToast('Picks loaded successfully!', 'success');
-            saveToLocalStorage();
-        } else {
-            // Try localStorage
-            const localPicks = localStorage.getItem(`picks_${username}`);
-            if (localPicks) {
-                userPicks = JSON.parse(localPicks);
-                applyPicksToUI();
-                showToast('Picks loaded from local storage!', 'success');
-            } else {
-                showToast('No picks found for this user', 'error');
-            }
-        }
-    } catch (error) {
-        console.error('Error loading from Supabase:', error);
-
-        // Fallback to localStorage
-        const localPicks = localStorage.getItem(`picks_${username}`);
-        if (localPicks) {
-            userPicks = JSON.parse(localPicks);
-            applyPicksToUI();
-            showToast('Loaded from local storage', 'success');
-        } else {
-            showToast('Could not load picks', 'error');
-        }
     }
 }
 

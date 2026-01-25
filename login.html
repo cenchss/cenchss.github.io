@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Night Out Predictions</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Night Out Predictions</h1>
+            <p class="subtitle">Login to make your picks</p>
+        </header>
+
+        <div class="login-card">
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" placeholder="Enter your username" required autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="Enter your password" required autocomplete="current-password">
+                </div>
+                <button type="submit" class="btn-primary btn-full">Login</button>
+            </form>
+            <p id="errorMsg" class="error-msg hidden">Invalid username or password</p>
+        </div>
+    </div>
+
+    <script>
+        // Hardcoded users
+        const USERS = {
+            'admin': 'admin',
+            'dhruva': 'louie',
+            'druv': 'degen'
+        };
+
+        // Check if already logged in
+        if (sessionStorage.getItem('loggedInUser')) {
+            window.location.href = 'index.html';
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const username = document.getElementById('username').value.trim().toLowerCase();
+            const password = document.getElementById('password').value;
+            const errorMsg = document.getElementById('errorMsg');
+
+            if (USERS[username] && USERS[username] === password) {
+                // Store login info
+                sessionStorage.setItem('loggedInUser', username);
+                // Redirect to main page
+                window.location.href = 'index.html';
+            } else {
+                errorMsg.classList.remove('hidden');
+                setTimeout(() => {
+                    errorMsg.classList.add('hidden');
+                }, 3000);
+            }
+        });
+    </script>
+</body>
+</html>
