@@ -1,10 +1,6 @@
-// Configuration for the betting prediction site
-// Change this URL to point to your friend's homeserver
-const CONFIG = {
-    // API endpoint for the backend server
-    // Example: 'http://192.168.1.100:3000/api' or 'https://myserver.example.com/api'
-    API_URL: 'http://localhost:3000/api',
+// Supabase configuration
+const SUPABASE_URL = 'https://iwemimumekwgumexvwez.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_secret_ae75G9iZY18ICD1Y-01_rg_-U92F8Z_';
 
-    // Set to true to use localStorage as fallback when server is unavailable
-    USE_LOCAL_FALLBACK: true
-};
+// Initialize Supabase client
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);

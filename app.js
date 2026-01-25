@@ -318,6 +318,15 @@ function loadFromLocalStorage() {
 
 // Apply picks to UI
 function applyPicksToUI() {
+    // First clear all selections
+    document.querySelectorAll('.bet-option').forEach(opt => {
+        opt.classList.remove('yes-selected', 'no-selected', 'over-selected', 'under-selected');
+    });
+    document.querySelectorAll('.bet-card').forEach(card => {
+        card.classList.remove('selected');
+    });
+
+    // Then apply current picks
     Object.entries(userPicks).forEach(([betId, pick]) => {
         const card = document.querySelector(`.bet-card[data-bet-id="${betId}"]`);
         if (card) {
@@ -331,7 +340,7 @@ function applyPicksToUI() {
     });
 }
 
-// Save picks to server
+// Save picks to Supabase
 async function savePicks() {
     const username = usernameInput.value.trim();
 
@@ -346,40 +355,49 @@ async function savePicks() {
         return;
     }
 
-    const data = {
-        username: username,
-        picks: userPicks,
-        timestamp: new Date().toISOString()
-    };
-
     try {
-        const response = await fetch(`${CONFIG.API_URL}/picks`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-        });
+        // Check if user already exists
+        const { data: existing } = await supabase
+            .from('picks')
+            .select('id')
+            .eq('username', username.toLowerCase())
+            .single();
 
-        if (response.ok) {
-            showToast('Picks saved successfully!', 'success');
-            saveToLocalStorage();
+        let result;
+        if (existing) {
+            // Update existing record
+            result = await supabase
+                .from('picks')
+                .update({
+                    picks: userPicks,
+                    updated_at: new Date().toISOString()
+                })
+                .eq('username', username.toLowerCase());
         } else {
-            throw new Error('Server error');
+            // Insert new record
+            result = await supabase
+                .from('picks')
+                .insert({
+                    username: username.toLowerCase(),
+                    display_name: username,
+                    picks: userPicks
+                });
         }
+
+        if (result.error) {
+            throw result.error;
+        }
+
+        showToast('Picks saved successfully!', 'success');
+        saveToLocalStorage();
     } catch (error) {
-        console.error('Error saving to server:', error);
-
-        if (CONFIG.USE_LOCAL_FALLBACK) {
-            saveToLocalStorage();
-            showToast('Saved locally (server unavailable)', 'success');
-        } else {
-            showToast('Failed to save picks. Server unavailable.', 'error');
-        }
+        console.error('Error saving to Supabase:', error);
+        saveToLocalStorage();
+        showToast('Saved locally (database error)', 'success');
     }
 }
 
-// Load picks from server
+// Load picks from Supabase
 async function loadPicks() {
     const username = usernameInput.value.trim();
 
@@ -390,14 +408,22 @@ async function loadPicks() {
     }
 
     try {
-        const response = await fetch(`${CONFIG.API_URL}/picks/${encodeURIComponent(username)}`);
+        const { data, error } = await supabase
+            .from('picks')
+            .select('picks, display_name')
+            .eq('username', username.toLowerCase())
+            .single();
 
-        if (response.ok) {
-            const data = await response.json();
-            userPicks = data.picks || {};
+        if (error && error.code !== 'PGRST116') {
+            throw error;
+        }
+
+        if (data && data.picks) {
+            userPicks = data.picks;
             applyPicksToUI();
             showToast('Picks loaded successfully!', 'success');
-        } else if (response.status === 404) {
+            saveToLocalStorage();
+        } else {
             // Try localStorage
             const localPicks = localStorage.getItem(`picks_${username}`);
             if (localPicks) {
@@ -407,20 +433,18 @@ async function loadPicks() {
             } else {
                 showToast('No picks found for this user', 'error');
             }
-        } else {
-            throw new Error('Server error');
         }
     } catch (error) {
-        console.error('Error loading from server:', error);
+        console.error('Error loading from Supabase:', error);
 
         // Fallback to localStorage
         const localPicks = localStorage.getItem(`picks_${username}`);
         if (localPicks) {
             userPicks = JSON.parse(localPicks);
             applyPicksToUI();
-            showToast('Loaded from local storage (server unavailable)', 'success');
+            showToast('Loaded from local storage', 'success');
         } else {
-            showToast('Could not load picks. Server unavailable.', 'error');
+            showToast('Could not load picks', 'error');
         }
     }
 }
@@ -431,16 +455,26 @@ async function viewAllPredictions() {
     resultsContent.innerHTML = '<p>Loading predictions...</p>';
 
     try {
-        const response = await fetch(`${CONFIG.API_URL}/picks`);
+        const { data, error } = await supabase
+            .from('picks')
+            .select('username, display_name, picks')
+            .order('created_at', { ascending: true });
 
-        if (response.ok) {
-            const allPicks = await response.json();
-            displayResults(allPicks);
+        if (error) {
+            throw error;
+        }
+
+        if (data && data.length > 0) {
+            const formattedData = data.map(row => ({
+                username: row.display_name || row.username,
+                picks: row.picks
+            }));
+            displayResults(formattedData);
         } else {
-            throw new Error('Server error');
+            resultsContent.innerHTML = '<p>No predictions yet!</p>';
         }
     } catch (error) {
-        console.error('Error fetching results:', error);
+        console.error('Error fetching from Supabase:', error);
 
         // Show local data as fallback
         const localUsers = [];
@@ -455,9 +489,9 @@ async function viewAllPredictions() {
 
         if (localUsers.length > 0) {
             displayResults(localUsers);
-            resultsContent.innerHTML = '<p style="color: #fdcb6e; margin-bottom: 15px;">Showing local data (server unavailable)</p>' + resultsContent.innerHTML;
+            resultsContent.innerHTML = '<p style="color: #fdcb6e; margin-bottom: 15px;">Showing local data (database unavailable)</p>' + resultsContent.innerHTML;
         } else {
-            resultsContent.innerHTML = '<p>Could not load predictions. Server unavailable.</p>';
+            resultsContent.innerHTML = '<p>Could not load predictions. Database unavailable.</p>';
         }
     }
 }
