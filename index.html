@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Night Out Predictions</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Night Out Predictions</h1>
+            <p class="subtitle">Make your picks for tonight's events</p>
+        </header>
+
+        <div class="user-section">
+            <label for="username">Your Name:</label>
+            <input type="text" id="username" placeholder="Enter your name to save picks">
+            <button id="loadPicks" class="btn-secondary">Load My Picks</button>
+        </div>
+
+        <div class="bets-container" id="betsContainer">
+            <!-- Bets will be loaded here -->
+        </div>
+
+        <div class="actions">
+            <button id="savePicks" class="btn-primary">Save All Picks</button>
+            <button id="viewResults" class="btn-secondary">View All Predictions</button>
+        </div>
+
+        <div id="resultsModal" class="modal hidden">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>All Predictions</h2>
+                <div id="resultsContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
