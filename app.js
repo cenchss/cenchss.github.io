@@ -4,11 +4,14 @@ if (!loggedInUser) {
     window.location.href = 'login.html';
 }
 
-// Display names for users (capitalize first letter)
+// Display names for users (random username -> real name)
 const DISPLAY_NAMES = {
-    'admin': 'Admin',
-    'dhruva': 'Dhruva',
-    'druv': 'Druv'
+    'xk7dmv': 'Dhruva',
+    'rw3jnt': 'Druv',
+    'pb8zcq': 'Arya',
+    'uy5fhk': 'Piyush',
+    'nc9vwx': 'Advay',
+    'jt2gma': 'Parth'
 };
 
 // All the bets data
