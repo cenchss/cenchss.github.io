@@ -6,6 +6,7 @@ if (!loggedInUser) {
 
 // Display names for users (random username -> real name)
 const DISPLAY_NAMES = {
+    'admin': 'Admin',
     'xk7dmv': 'Dhruva',
     'rw3jnt': 'Druv',
     'pb8zcq': 'Arya',
@@ -13,6 +14,11 @@ const DISPLAY_NAMES = {
     'nc9vwx': 'Advay',
     'jt2gma': 'Parth'
 };
+
+// Check if current user is admin
+function isAdmin() {
+    return loggedInUser === 'admin';
+}
 
 // All the bets data
 const BETS = [
@@ -225,11 +231,18 @@ const viewResultsBtn = document.getElementById('viewResults');
 const resultsModal = document.getElementById('resultsModal');
 const resultsContent = document.getElementById('resultsContent');
 const closeModal = document.querySelector('.close');
+const adminControls = document.getElementById('adminControls');
+const clearAllBetsBtn = document.getElementById('clearAllBets');
 
 // Initialize the app
 function init() {
     // Set display name
     displayNameEl.textContent = getDisplayName();
+
+    // Show admin controls if admin
+    if (isAdmin()) {
+        adminControls.classList.remove('hidden');
+    }
 
     renderBets();
     setupEventListeners();
@@ -286,6 +299,11 @@ function setupEventListeners() {
 
     // Logout
     logoutBtn.addEventListener('click', logout);
+
+    // Admin: Clear all bets
+    if (clearAllBetsBtn) {
+        clearAllBetsBtn.addEventListener('click', clearAllBets);
+    }
 
     // Close modal
     closeModal.addEventListener('click', () => {
@@ -550,6 +568,48 @@ function displayResults(allPicks) {
     `;
 
     resultsContent.innerHTML = html;
+}
+
+// Admin: Clear all bets
+async function clearAllBets() {
+    if (!isAdmin()) {
+        showToast('Admin access required', 'error');
+        return;
+    }
+
+    const confirmed = confirm('Are you sure you want to delete ALL predictions? This cannot be undone!');
+    if (!confirmed) return;
+
+    try {
+        // Delete all records from Supabase
+        const { error } = await supabaseClient
+            .from('picks')
+            .delete()
+            .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all rows
+
+        if (error) {
+            throw error;
+        }
+
+        // Clear all local storage picks
+        const keysToRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key.startsWith('picks_')) {
+                keysToRemove.push(key);
+            }
+        }
+        keysToRemove.forEach(key => localStorage.removeItem(key));
+
+        // Reset current user picks
+        userPicks = {};
+        applyPicksToUI();
+
+        showToast('All bets cleared successfully!', 'success');
+    } catch (error) {
+        console.error('Error clearing bets:', error);
+        showToast('Failed to clear bets', 'error');
+    }
 }
 
 // Show toast notification
