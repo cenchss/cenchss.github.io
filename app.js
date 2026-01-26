@@ -12,7 +12,8 @@ const DISPLAY_NAMES = {
     'pb8zcq': 'Arya',
     'uy5fhk': 'Piyush',
     'nc9vwx': 'Advay',
-    'jt2gma': 'Parth'
+    'jt2gma': 'Parth',
+    'ks4bfr': 'Anya'
 };
 
 // Check if current user is admin
