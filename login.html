@@ -3,31 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Night Out Predictions</title>
+    <title>Login · Operation Tracker</title>
     <link rel="stylesheet" href="styles.css">
 </head>
-<body>
-    <div class="container">
-        <header>
-            <h1>Night Out Predictions</h1>
-            <p class="subtitle">Login to make your picks</p>
-        </header>
-
+<body class="login-page">
+    <main class="login-wrap">
         <div class="login-card">
-            <form id="loginForm">
+            <div class="login-brand">
+                <span class="brand-mark">◎</span>
+                <h1>Operation Tracker</h1>
+                <p class="login-sub">Members only. Log in to view mission progress.</p>
+            </div>
+
+            <form id="loginForm" autocomplete="on">
                 <div class="form-group">
                     <label for="username">Username</label>
-                    <input type="text" id="username" placeholder="Enter your username" required autocomplete="username">
+                    <input type="text" id="username" placeholder="username" required autocomplete="username" autocapitalize="none">
                 </div>
                 <div class="form-group">
                     <label for="password">Password</label>
-                    <input type="password" id="password" placeholder="Enter your password" required autocomplete="current-password">
+                    <input type="password" id="password" placeholder="password" required autocomplete="current-password">
                 </div>
-                <button type="submit" class="btn-primary btn-full">Login</button>
+                <button type="submit" class="btn btn-primary btn-full">Enter</button>
             </form>
             <p id="errorMsg" class="error-msg hidden">Invalid username or password</p>
         </div>
-    </div>
+        <p class="login-footer">If you know, you know.</p>
+    </main>
 
     <script>
         // Hardcoded users
@@ -37,7 +39,7 @@
             'druv': 'degen'
         };
 
-        // Check if already logged in
+        // Already logged in? Straight to the dashboard.
         if (sessionStorage.getItem('loggedInUser')) {
             window.location.href = 'index.html';
         }
@@ -50,15 +52,11 @@
             const errorMsg = document.getElementById('errorMsg');
 
             if (USERS[username] && USERS[username] === password) {
-                // Store login info
                 sessionStorage.setItem('loggedInUser', username);
-                // Redirect to main page
                 window.location.href = 'index.html';
             } else {
                 errorMsg.classList.remove('hidden');
-                setTimeout(() => {
-                    errorMsg.classList.add('hidden');
-                }, 3000);
+                setTimeout(() => errorMsg.classList.add('hidden'), 3000);
             }
         });
     </script>

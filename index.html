@@ -3,38 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Night Out Predictions</title>
+    <title>Operation Tracker</title>
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Night Out Predictions</h1>
-            <p class="subtitle">Make your picks for tonight's events</p>
+    <div class="app">
+        <header class="topbar">
+            <div class="brand">
+                <h1><span class="brand-mark">◎</span> Operation Tracker</h1>
+                <p class="tagline">Live mission progress · members only</p>
+            </div>
+            <div class="user-box">
+                <span class="welcome">Signed in as <strong id="displayName"></strong></span>
+                <button id="refreshBtn" class="btn btn-ghost" title="Refresh from server">↻ Refresh</button>
+                <button id="logoutBtn" class="btn btn-ghost">Log out</button>
+            </div>
         </header>
 
-        <div class="user-header">
-            <span class="welcome">Welcome, <strong id="displayName"></strong></span>
-            <button id="logoutBtn" class="btn-logout">Logout</button>
-        </div>
-
-        <div class="bets-container" id="betsContainer">
-            <!-- Bets will be loaded here -->
-        </div>
-
-        <div class="actions">
-            <button id="savePicks" class="btn-primary">Save All Picks</button>
-            <button id="viewResults" class="btn-secondary">View All Predictions</button>
-        </div>
-
-        <div id="resultsModal" class="modal hidden">
-            <div class="modal-content">
-                <span class="close">&times;</span>
-                <h2>All Predictions</h2>
-                <div id="resultsContent"></div>
+        <!-- Stat tiles -->
+        <section class="stats-row" aria-label="Mission summary">
+            <div class="stat-tile">
+                <span class="stat-label">Deadline</span>
+                <span class="stat-value" id="daysLeft">–</span>
+                <span class="stat-sub" id="deadlineText"></span>
             </div>
-        </div>
+            <div class="stat-tile">
+                <span class="stat-label">Points cleared</span>
+                <span class="stat-value"><span id="pointsValue">0</span><span class="stat-denom"> / 600</span></span>
+                <span class="stat-sub" id="pointsSub">Nothing cleared yet</span>
+            </div>
+            <div class="stat-tile">
+                <span class="stat-label">Current stage</span>
+                <span class="stat-value stat-value-sm" id="stageValue">–</span>
+                <span class="stat-sub" id="stageSub"></span>
+            </div>
+            <div class="stat-tile">
+                <span class="stat-label">Time elapsed</span>
+                <div class="meter" role="img" aria-label="Share of the 1.5-week window already used">
+                    <div class="meter-fill" id="timeMeter" style="width:0%"></div>
+                </div>
+                <span class="stat-sub" id="timeMeterText"></span>
+            </div>
+        </section>
+
+        <!-- Step 1: the gate -->
+        <section class="gate-card" id="gateCard">
+            <div class="gate-head">
+                <span class="step-chip">Step 1 · Prerequisite</span>
+                <span class="status-chip" id="gateStatusChip"></span>
+            </div>
+            <h2 class="gate-title">Rohit has to discover it first</h2>
+            <p class="gate-rule">Rohit has to say that he finds her attractive — <strong>and it has to happen IRL.</strong> No texts, no hints, no leading questions. Until this happens, everything below stays locked.</p>
+            <div class="gate-actions" id="gateActions"></div>
+        </section>
+
+        <!-- Milestones -->
+        <section aria-label="Milestones">
+            <div class="section-head">
+                <h2>Milestones</h2>
+                <p class="section-sub">Unlock by clearing Step 1. Anyone can edit the descriptions and update status.</p>
+            </div>
+            <div class="milestones" id="milestones"></div>
+        </section>
+
+        <!-- Activity log -->
+        <section class="log-section" aria-label="Activity log">
+            <div class="section-head">
+                <h2>Activity log</h2>
+                <p class="section-sub">Field reports, sightings, and status changes — visible to everyone.</p>
+            </div>
+            <form id="logForm" class="log-form">
+                <input type="text" id="logInput" placeholder="Post an update… (e.g. 'promising development at lunch today')" maxlength="280">
+                <button type="submit" class="btn btn-primary">Post</button>
+            </form>
+            <ul class="log-list" id="logList"></ul>
+        </section>
+
+        <footer class="footer">
+            <span id="syncStatus"></span>
+        </footer>
     </div>
 
     <script src="config.js"></script>
