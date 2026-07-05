@@ -1,565 +1,459 @@
-// Check if user is logged in
+// Require login
 const loggedInUser = sessionStorage.getItem('loggedInUser');
 if (!loggedInUser) {
     window.location.href = 'login.html';
 }
 
-// Display names for users (capitalize first letter)
 const DISPLAY_NAMES = {
     'admin': 'Admin',
     'dhruva': 'Dhruva',
     'druv': 'Druv'
 };
 
-// All the bets data
-const BETS = [
-    {
-        id: 1,
-        description: 'Mentions "I\'m just being honest"',
-        type: 'O/U',
-        threshold: '1 time',
-        details: 'After saying something ridiculous about women'
-    },
-    {
-        id: 2,
-        description: 'Gazes at a woman for more than 3 seconds',
-        type: 'O/U',
-        threshold: '5 sec',
-        details: 'Stares awkwardly without saying anything'
-    },
-    {
-        id: 3,
-        description: 'Mentions being "too nice"',
-        type: 'O/U',
-        threshold: '1 time',
-        details: 'Complains about being "too nice" to a girl'
-    },
-    {
-        id: 4,
-        description: 'Tries to make a "smooth" move but it backfires',
-        type: 'O/U',
-        threshold: '30 sec',
-        details: 'Fails a "smooth" line with a girl'
-    },
-    {
-        id: 5,
-        description: 'Checks his phone mid-convo',
-        type: 'O/U',
-        threshold: '10 sec',
-        details: 'Uses phone to avoid awkward silence with a girl'
-    },
-    {
-        id: 6,
-        description: 'Gets rejected by a girl but still tries to save face',
-        type: 'YES/NO',
-        details: 'Rejection happens, still keeps trying'
-    },
-    {
-        id: 7,
-        description: 'Compliments a woman, but it sounds like a critique',
-        type: 'YES/NO',
-        details: 'Compliments are awkward and backfire'
-    },
-    {
-        id: 8,
-        description: 'Tries to hold a girl\'s hand but gets rejected awkwardly',
-        type: 'YES/NO',
-        details: 'Goes for the handhold but gets rejected'
-    },
-    {
-        id: 9,
-        description: 'Makes a "joke" but it\'s so cringe it\'s uncomfortable',
-        type: 'YES/NO',
-        details: 'Awkward joke leads to uncomfortable silence'
-    },
-    {
-        id: 10,
-        description: 'Says "I don\'t usually talk to women like this"',
-        type: 'YES/NO',
-        details: 'Claims to be out of his comfort zone'
-    },
-    {
-        id: 11,
-        description: 'Mentions his lack of experience with women in front of a girl',
-        type: 'YES/NO',
-        details: 'Shares his lack of experience in a cringe way'
-    },
-    {
-        id: 12,
-        description: 'Starts talking about his "dating struggles" within 5 mins',
-        type: 'YES/NO',
-        details: 'Talks too much about his struggles early on'
-    },
-    {
-        id: 13,
-        description: 'Says something ridiculous, even the group cringes',
-        type: 'YES/NO',
-        details: 'Says something completely out of touch'
-    },
-    {
-        id: 14,
-        description: 'Tries to talk about his "dating philosophy" but it\'s just nonsense',
-        type: 'YES/NO',
-        details: 'Nonsensical dating advice spilled after a drink'
-    },
-    {
-        id: 15,
-        description: 'Gets super drunk and says "women don\'t understand me"',
-        type: 'YES/NO',
-        details: 'In a drunken rant about women misunderstanding him'
-    },
-    {
-        id: 16,
-        description: 'Starts talking about how "women just don\'t understand"',
-        type: 'YES/NO',
-        details: 'Speaks to the group about societal issues with women'
-    },
-    {
-        id: 17,
-        description: 'Comes up with a plan to "improve" himself but it\'s totally delusional',
-        type: 'YES/NO',
-        details: 'Gives an unrealistic "self-improvement" speech'
-    },
-    {
-        id: 18,
-        description: 'Gets rejected and then says "well, I guess I\'m just not your type"',
-        type: 'YES/NO',
-        details: 'Rejected, then gives up immediately'
-    },
-    {
-        id: 19,
-        description: 'Sends a cringy "Let\'s hang soon" text to a girl he barely talked to',
-        type: 'YES/NO',
-        details: 'Sends text to a girl who showed no interest'
-    },
-    {
-        id: 20,
-        description: 'Says to the group, "I just don\'t get why women like that"',
-        type: 'YES/NO',
-        details: 'Complains about women after being ignored'
-    },
-    {
-        id: 21,
-        description: 'Starts going on about how "he\'s not looking for anything serious" but clearly is',
-        type: 'YES/NO',
-        details: 'Says one thing but clearly does another'
-    },
-    {
-        id: 22,
-        description: 'Leaves early and claims it\'s "because he\'s tired" but it\'s really because he\'s embarrassed',
-        type: 'YES/NO',
-        details: 'Leaves abruptly, hides embarrassment'
-    },
-    {
-        id: 23,
-        description: 'Tries to talk to a girl but immediately mentions how he "sucks at this"',
-        type: 'YES/NO',
-        details: 'Self-deprecates before even starting the conversation'
-    },
-    {
-        id: 24,
-        description: 'Mentions "I\'m just a nice guy, that\'s why no one likes me"',
-        type: 'YES/NO',
-        details: 'Whines about being the "nice guy"'
-    },
-    {
-        id: 25,
-        description: 'Compliments a girl, but it\'s about her appearance and he\'s awkward about it',
-        type: 'YES/NO',
-        details: 'Compliments backfires and makes it awkward'
-    },
-    {
-        id: 26,
-        description: 'Mentions "I\'m just not the type to get attention" when no one asked',
-        type: 'YES/NO',
-        details: 'Says self-pitying stuff no one asked for'
-    },
-    {
-        id: 27,
-        description: 'Starts a conversation but immediately mentions "I\'m not used to this"',
-        type: 'YES/NO',
-        details: 'Starts conversation but already insecure'
-    },
-    {
-        id: 28,
-        description: 'Tells a girl he\'s not used to talking to women, which immediately makes her uncomfortable',
-        type: 'YES/NO',
-        details: 'Awkwardly admits lack of experience in conversation'
-    },
-    {
-        id: 29,
-        description: 'Sends a cringy message to a girl he barely knows',
-        type: 'YES/NO',
-        details: 'Sends a random, awkward follow-up message'
-    },
-    {
-        id: 30,
-        description: 'Mentions "I don\'t get why women like that" after a rejection',
-        type: 'YES/NO',
-        details: 'Complains after a woman shows no interest'
-    }
-];
+// Mission window: 1.5 weeks starting July 5, 2026
+const MISSION_START = new Date('2026-07-05T00:00:00');
+const MISSION_DEADLINE = new Date('2026-07-16T23:59:59');
 
-// Current user's picks
-let userPicks = {};
+const MILESTONE_POINTS = [100, 200, 300];
+const TOTAL_POINTS = MILESTONE_POINTS.reduce((a, b) => a + b, 0);
 
-// Get current username
-function getUsername() {
-    return loggedInUser;
+const STATUS_LABELS = {
+    not_started: 'Not started',
+    in_progress: 'In progress',
+    done: 'Done'
+};
+
+const STATUS_ICONS = {
+    not_started: '○',
+    in_progress: '◐',
+    done: '●'
+};
+
+// Shared state lives in the existing Supabase "picks" table as a reserved row,
+// so no new table is needed. Falls back to localStorage if the DB is down.
+const STATE_ROW_USERNAME = '__mission_state__';
+const LOCAL_STATE_KEY = 'mission_state_v1';
+
+function defaultState() {
+    return {
+        gate: { status: 'pending', completedAt: null, completedBy: null },
+        milestones: MILESTONE_POINTS.map(points => ({
+            points: points,
+            title: '',
+            description: '',
+            status: 'not_started'
+        })),
+        log: []
+    };
 }
 
-// Get display name
-function getDisplayName() {
-    return DISPLAY_NAMES[loggedInUser] || loggedInUser;
+let state = defaultState();
+let editingIndex = null; // milestone card currently in edit mode
+let lastSyncSource = null;
+
+// ---------- DOM ----------
+const els = {
+    displayName: document.getElementById('displayName'),
+    logoutBtn: document.getElementById('logoutBtn'),
+    refreshBtn: document.getElementById('refreshBtn'),
+    daysLeft: document.getElementById('daysLeft'),
+    deadlineText: document.getElementById('deadlineText'),
+    pointsValue: document.getElementById('pointsValue'),
+    pointsSub: document.getElementById('pointsSub'),
+    stageValue: document.getElementById('stageValue'),
+    stageSub: document.getElementById('stageSub'),
+    timeMeter: document.getElementById('timeMeter'),
+    timeMeterText: document.getElementById('timeMeterText'),
+    gateStatusChip: document.getElementById('gateStatusChip'),
+    gateActions: document.getElementById('gateActions'),
+    gateCard: document.getElementById('gateCard'),
+    milestones: document.getElementById('milestones'),
+    logForm: document.getElementById('logForm'),
+    logInput: document.getElementById('logInput'),
+    logList: document.getElementById('logList'),
+    syncStatus: document.getElementById('syncStatus')
+};
+
+function getDisplayName(username) {
+    return DISPLAY_NAMES[username] || (username ? username.charAt(0).toUpperCase() + username.slice(1) : 'Unknown');
 }
 
-// DOM Elements
-const betsContainer = document.getElementById('betsContainer');
-const displayNameEl = document.getElementById('displayName');
-const logoutBtn = document.getElementById('logoutBtn');
-const savePicksBtn = document.getElementById('savePicks');
-const viewResultsBtn = document.getElementById('viewResults');
-const resultsModal = document.getElementById('resultsModal');
-const resultsContent = document.getElementById('resultsContent');
-const closeModal = document.querySelector('.close');
-
-// Initialize the app
-function init() {
-    // Set display name
-    displayNameEl.textContent = getDisplayName();
-
-    renderBets();
-    setupEventListeners();
-    loadUserPicks();
+function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str == null ? '' : String(str);
+    return div.innerHTML;
 }
 
-// Render all bets
-function renderBets() {
-    betsContainer.innerHTML = BETS.map(bet => {
-        const isOverUnder = bet.type === 'O/U';
-        const option1 = isOverUnder ? 'OVER' : 'YES';
-        const option2 = isOverUnder ? 'UNDER' : 'NO';
-        const option1Class = isOverUnder ? 'over' : 'yes';
-        const option2Class = isOverUnder ? 'under' : 'no';
+// ---------- Persistence ----------
 
-        return `
-            <div class="bet-card" data-bet-id="${bet.id}">
-                <div class="bet-header">
-                    <div class="bet-description">${bet.description}</div>
-                    <span class="bet-type">${bet.type}${bet.threshold ? ` ${bet.threshold}` : ''}</span>
-                </div>
-                <div class="bet-details">${bet.details}</div>
-                <div class="bet-options">
-                    <button class="bet-option" data-bet-id="${bet.id}" data-pick="${option1.toLowerCase()}" data-option-class="${option1Class}">
-                        ${option1}
-                    </button>
-                    <button class="bet-option" data-bet-id="${bet.id}" data-pick="${option2.toLowerCase()}" data-option-class="${option2Class}">
-                        ${option2}
-                    </button>
-                </div>
-            </div>
-        `;
-    }).join('');
-}
-
-// Setup event listeners
-function setupEventListeners() {
-    // Bet option clicks
-    betsContainer.addEventListener('click', (e) => {
-        if (e.target.classList.contains('bet-option')) {
-            const betId = e.target.dataset.betId;
-            const pick = e.target.dataset.pick;
-            const optionClass = e.target.dataset.optionClass;
-
-            selectPick(betId, pick, optionClass);
-        }
-    });
-
-    // Save picks
-    savePicksBtn.addEventListener('click', savePicks);
-
-    // View results
-    viewResultsBtn.addEventListener('click', viewAllPredictions);
-
-    // Logout
-    logoutBtn.addEventListener('click', logout);
-
-    // Close modal
-    closeModal.addEventListener('click', () => {
-        resultsModal.classList.add('hidden');
-    });
-
-    resultsModal.addEventListener('click', (e) => {
-        if (e.target === resultsModal) {
-            resultsModal.classList.add('hidden');
-        }
-    });
-}
-
-// Logout function
-function logout() {
-    sessionStorage.removeItem('loggedInUser');
-    window.location.href = 'login.html';
-}
-
-// Select a pick
-function selectPick(betId, pick, optionClass) {
-    userPicks[betId] = pick;
-
-    // Update UI
-    const card = document.querySelector(`.bet-card[data-bet-id="${betId}"]`);
-    const options = card.querySelectorAll('.bet-option');
-
-    options.forEach(opt => {
-        opt.classList.remove('yes-selected', 'no-selected', 'over-selected', 'under-selected');
-        if (opt.dataset.pick === pick) {
-            opt.classList.add(`${optionClass}-selected`);
-        }
-    });
-
-    card.classList.add('selected');
-
-    // Save to localStorage immediately
-    saveToLocalStorage();
-}
-
-// Save to localStorage
-function saveToLocalStorage() {
-    const username = getUsername();
-    localStorage.setItem(`picks_${username}`, JSON.stringify(userPicks));
-}
-
-// Load user picks on init
-async function loadUserPicks() {
-    const username = getUsername();
-
+async function loadState() {
     try {
         const { data, error } = await supabase
             .from('picks')
             .select('picks')
-            .eq('username', username)
+            .eq('username', STATE_ROW_USERNAME)
             .single();
 
-        if (error && error.code !== 'PGRST116') {
-            throw error;
-        }
+        if (error && error.code !== 'PGRST116') throw error;
 
         if (data && data.picks) {
-            userPicks = data.picks;
-            applyPicksToUI();
+            state = normalizeState(data.picks);
+            lastSyncSource = 'server';
+            localStorage.setItem(LOCAL_STATE_KEY, JSON.stringify(state));
+            return;
+        }
+        // No server row yet — fall through to local
+        throw { code: 'PGRST116' };
+    } catch (err) {
+        const local = localStorage.getItem(LOCAL_STATE_KEY);
+        if (local) {
+            try { state = normalizeState(JSON.parse(local)); } catch (e) { state = defaultState(); }
         } else {
-            // Try localStorage
-            const localPicks = localStorage.getItem(`picks_${username}`);
-            if (localPicks) {
-                userPicks = JSON.parse(localPicks);
-                applyPicksToUI();
-            }
+            state = defaultState();
         }
-    } catch (error) {
-        console.error('Error loading picks:', error);
-        // Fallback to localStorage
-        const localPicks = localStorage.getItem(`picks_${username}`);
-        if (localPicks) {
-            userPicks = JSON.parse(localPicks);
-            applyPicksToUI();
-        }
+        lastSyncSource = (err && err.code === 'PGRST116') ? 'server-empty' : 'local';
     }
 }
 
-// Apply picks to UI
-function applyPicksToUI() {
-    // First clear all selections
-    document.querySelectorAll('.bet-option').forEach(opt => {
-        opt.classList.remove('yes-selected', 'no-selected', 'over-selected', 'under-selected');
-    });
-    document.querySelectorAll('.bet-card').forEach(card => {
-        card.classList.remove('selected');
-    });
-
-    // Then apply current picks
-    Object.entries(userPicks).forEach(([betId, pick]) => {
-        const card = document.querySelector(`.bet-card[data-bet-id="${betId}"]`);
-        if (card) {
-            const option = card.querySelector(`.bet-option[data-pick="${pick}"]`);
-            if (option) {
-                const optionClass = option.dataset.optionClass;
-                option.classList.add(`${optionClass}-selected`);
-                card.classList.add('selected');
-            }
-        }
-    });
-}
-
-// Save picks to Supabase
-async function savePicks() {
-    const username = getUsername();
-    const displayName = getDisplayName();
-
-    if (Object.keys(userPicks).length === 0) {
-        showToast('Please make at least one pick!', 'error');
-        return;
-    }
-
+async function saveState() {
+    localStorage.setItem(LOCAL_STATE_KEY, JSON.stringify(state));
     try {
-        // Check if user already exists
         const { data: existing } = await supabase
             .from('picks')
             .select('id')
-            .eq('username', username)
+            .eq('username', STATE_ROW_USERNAME)
             .single();
 
         let result;
         if (existing) {
-            // Update existing record
             result = await supabase
                 .from('picks')
-                .update({
-                    picks: userPicks,
-                    updated_at: new Date().toISOString()
-                })
-                .eq('username', username);
+                .update({ picks: state, updated_at: new Date().toISOString() })
+                .eq('username', STATE_ROW_USERNAME);
         } else {
-            // Insert new record
             result = await supabase
                 .from('picks')
                 .insert({
-                    username: username,
-                    display_name: displayName,
-                    picks: userPicks
+                    username: STATE_ROW_USERNAME,
+                    display_name: 'Mission State',
+                    picks: state
                 });
         }
-
-        if (result.error) {
-            throw result.error;
-        }
-
-        showToast('Picks saved successfully!', 'success');
-        saveToLocalStorage();
+        if (result.error) throw result.error;
+        setSyncStatus('Synced with server · ' + new Date().toLocaleTimeString());
+        return true;
     } catch (error) {
-        console.error('Error saving to Supabase:', error);
-        saveToLocalStorage();
-        showToast('Saved locally (database error)', 'success');
+        console.error('Error saving state:', error);
+        setSyncStatus('Saved locally only — server unreachable');
+        showToast('Saved on this device (server unreachable)', 'error');
+        return false;
     }
 }
 
-// View all predictions
-async function viewAllPredictions() {
-    resultsModal.classList.remove('hidden');
-    resultsContent.innerHTML = '<p>Loading predictions...</p>';
+function normalizeState(raw) {
+    const base = defaultState();
+    if (!raw || typeof raw !== 'object') return base;
+    if (raw.gate && typeof raw.gate === 'object') {
+        base.gate.status = raw.gate.status === 'done' ? 'done' : 'pending';
+        base.gate.completedAt = raw.gate.completedAt || null;
+        base.gate.completedBy = raw.gate.completedBy || null;
+    }
+    if (Array.isArray(raw.milestones)) {
+        base.milestones = base.milestones.map((m, i) => {
+            const r = raw.milestones[i] || {};
+            return {
+                points: m.points,
+                title: typeof r.title === 'string' ? r.title : '',
+                description: typeof r.description === 'string' ? r.description : '',
+                status: ['not_started', 'in_progress', 'done'].includes(r.status) ? r.status : 'not_started'
+            };
+        });
+    }
+    if (Array.isArray(raw.log)) {
+        base.log = raw.log.slice(0, 200);
+    }
+    return base;
+}
 
-    try {
-        const { data, error } = await supabase
-            .from('picks')
-            .select('username, display_name, picks')
-            .order('created_at', { ascending: true });
+function addLog(text, system) {
+    state.log.unshift({
+        ts: new Date().toISOString(),
+        user: loggedInUser,
+        text: text,
+        system: !!system
+    });
+    state.log = state.log.slice(0, 200);
+}
 
-        if (error) {
-            throw error;
-        }
+function setSyncStatus(text) {
+    els.syncStatus.textContent = text;
+}
 
-        if (data && data.length > 0) {
-            const formattedData = data.map(row => ({
-                username: row.display_name || row.username,
-                picks: row.picks
-            }));
-            displayResults(formattedData);
-        } else {
-            resultsContent.innerHTML = '<p>No predictions yet!</p>';
-        }
-    } catch (error) {
-        console.error('Error fetching from Supabase:', error);
+// ---------- Rendering ----------
 
-        // Show local data as fallback
-        const localUsers = [];
-        for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            if (key.startsWith('picks_')) {
-                const username = key.replace('picks_', '');
-                const picks = JSON.parse(localStorage.getItem(key));
-                localUsers.push({ username, picks });
-            }
-        }
+function render() {
+    renderStats();
+    renderGate();
+    renderMilestones();
+    renderLog();
+}
 
-        if (localUsers.length > 0) {
-            displayResults(localUsers);
-            resultsContent.innerHTML = '<p style="color: #fdcb6e; margin-bottom: 15px;">Showing local data (database unavailable)</p>' + resultsContent.innerHTML;
-        } else {
-            resultsContent.innerHTML = '<p>Could not load predictions. Database unavailable.</p>';
-        }
+function renderStats() {
+    const now = new Date();
+    const msLeft = MISSION_DEADLINE - now;
+    const daysLeft = Math.max(0, Math.ceil(msLeft / 86400000));
+
+    els.daysLeft.textContent = msLeft <= 0 ? 'Time up' : daysLeft + (daysLeft === 1 ? ' day' : ' days');
+    els.daysLeft.classList.toggle('stat-urgent', msLeft <= 0 || daysLeft <= 3);
+    els.deadlineText.textContent = 'Ends ' + MISSION_DEADLINE.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+
+    const donePoints = state.milestones
+        .filter(m => m.status === 'done')
+        .reduce((sum, m) => sum + m.points, 0);
+    els.pointsValue.textContent = donePoints;
+    const doneCount = state.milestones.filter(m => m.status === 'done').length;
+    els.pointsSub.textContent = doneCount === 0
+        ? 'Nothing cleared yet'
+        : doneCount + ' of ' + state.milestones.length + ' milestones cleared';
+
+    if (state.gate.status !== 'done') {
+        els.stageValue.textContent = 'Waiting on Rohit';
+        els.stageSub.textContent = 'Step 1 not confirmed';
+    } else if (doneCount === state.milestones.length) {
+        els.stageValue.textContent = 'Mission complete';
+        els.stageSub.textContent = 'All milestones cleared';
+    } else {
+        const inProgress = state.milestones.filter(m => m.status === 'in_progress').length;
+        els.stageValue.textContent = 'Milestones live';
+        els.stageSub.textContent = inProgress > 0
+            ? inProgress + ' in progress'
+            : 'Unlocked — get to work';
+    }
+
+    const total = MISSION_DEADLINE - MISSION_START;
+    const elapsed = Math.min(Math.max(now - MISSION_START, 0), total);
+    const pct = Math.round((elapsed / total) * 100);
+    els.timeMeter.style.width = pct + '%';
+    els.timeMeterText.textContent = pct + '% of the window used';
+}
+
+function renderGate() {
+    const done = state.gate.status === 'done';
+
+    els.gateStatusChip.className = 'status-chip ' + (done ? 'done' : 'pending');
+    els.gateStatusChip.textContent = done ? '● Confirmed' : '◐ Waiting';
+
+    if (done) {
+        const when = state.gate.completedAt
+            ? new Date(state.gate.completedAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+            : '';
+        els.gateActions.innerHTML =
+            '<span class="gate-done-note">✔ Confirmed by ' + escapeHtml(getDisplayName(state.gate.completedBy)) +
+            (when ? ' on ' + when : '') + '. Milestones are unlocked.</span>' +
+            '<button class="btn btn-danger-ghost btn-sm" id="gateUndoBtn">Undo (false alarm)</button>';
+        document.getElementById('gateUndoBtn').addEventListener('click', undoGate);
+    } else {
+        els.gateActions.innerHTML =
+            '<button class="btn btn-good" id="gateConfirmBtn">It happened — confirm IRL sighting</button>' +
+            '<span class="gate-done-note">Only confirm if it actually happened in person.</span>';
+        document.getElementById('gateConfirmBtn').addEventListener('click', confirmGate);
     }
 }
 
-// Display results in modal
-function displayResults(allPicks) {
-    if (!allPicks || allPicks.length === 0) {
-        resultsContent.innerHTML = '<p>No predictions yet!</p>';
+function renderMilestones() {
+    const locked = state.gate.status !== 'done';
+
+    els.milestones.innerHTML = state.milestones.map((m, i) => {
+        const isEditing = editingIndex === i;
+        const title = m.title || ('Milestone ' + (i + 1));
+        const hasDesc = !!m.description;
+
+        let body;
+        if (isEditing) {
+            body =
+                '<div>' +
+                '<input class="edit-input" id="editTitle" maxlength="80" placeholder="Milestone name" value="' + escapeHtml(m.title) + '">' +
+                '<textarea class="edit-textarea" id="editDesc" maxlength="500" placeholder="What exactly has to happen for this one to count?">' + escapeHtml(m.description) + '</textarea>' +
+                '<div class="edit-actions">' +
+                '<button class="btn btn-primary btn-sm" data-action="save-edit" data-index="' + i + '">Save</button>' +
+                '<button class="btn btn-sm" data-action="cancel-edit">Cancel</button>' +
+                '</div></div>';
+        } else {
+            body =
+                '<div class="milestone-title">' + escapeHtml(title) + '</div>' +
+                '<div class="milestone-desc' + (hasDesc ? '' : ' placeholder') + '">' +
+                (hasDesc ? escapeHtml(m.description) : 'No description yet — hit Edit and write down what has to happen for this to count.') +
+                '</div>' +
+                '<div class="status-row">' +
+                ['not_started', 'in_progress', 'done'].map(s =>
+                    '<button class="status-btn' + (m.status === s ? ' active-' + s : '') + '" data-action="set-status" data-index="' + i + '" data-status="' + s + '">' +
+                    STATUS_LABELS[s] + '</button>'
+                ).join('') +
+                '</div>' +
+                '<div class="milestone-foot">' +
+                '<span class="milestone-status-text s-' + m.status + '">' + STATUS_ICONS[m.status] + ' ' + STATUS_LABELS[m.status] + '</span>' +
+                '<button class="btn btn-ghost btn-sm" data-action="edit" data-index="' + i + '">Edit</button>' +
+                '</div>';
+        }
+
+        const lockOverlay = locked
+            ? '<div class="lock-overlay"><span class="lock-icon">🔒</span><p>Locked until Step 1 is confirmed</p></div>'
+            : '';
+
+        return '<article class="milestone-card' +
+            (locked ? ' is-locked' : '') +
+            (m.status === 'done' ? ' is-done' : '') + '">' +
+            '<div class="milestone-top"><span class="points-badge">' + m.points + '<small>pts</small></span></div>' +
+            body + lockOverlay +
+            '</article>';
+    }).join('');
+}
+
+function renderLog() {
+    if (!state.log.length) {
+        els.logList.innerHTML = '<li class="log-empty">No activity yet. First update wins bragging rights.</li>';
         return;
     }
-
-    let html = '<table class="results-table"><thead><tr><th>User</th>';
-
-    // Add bet columns (abbreviated)
-    BETS.forEach((bet, index) => {
-        html += `<th title="${bet.description}">#${index + 1}</th>`;
-    });
-
-    html += '</tr></thead><tbody>';
-
-    allPicks.forEach(user => {
-        html += `<tr><td>${user.username}</td>`;
-
-        BETS.forEach(bet => {
-            const pick = user.picks[bet.id] || '-';
-            let pickClass = '';
-            let displayPick = pick;
-
-            if (pick === 'yes') {
-                pickClass = 'pick-yes';
-                displayPick = 'Y';
-            } else if (pick === 'no') {
-                pickClass = 'pick-no';
-                displayPick = 'N';
-            } else if (pick === 'over') {
-                pickClass = 'pick-over';
-                displayPick = 'O';
-            } else if (pick === 'under') {
-                pickClass = 'pick-under';
-                displayPick = 'U';
-            }
-
-            html += `<td class="${pickClass}">${displayPick}</td>`;
+    els.logList.innerHTML = state.log.map(entry => {
+        const when = new Date(entry.ts).toLocaleString(undefined, {
+            month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit'
         });
-
-        html += '</tr>';
-    });
-
-    html += '</tbody></table>';
-
-    // Add legend
-    html += `
-        <div style="margin-top: 20px; font-size: 0.85rem; color: #8892b0;">
-            <strong>Legend:</strong>
-            <span class="pick-yes">Y = Yes</span> |
-            <span class="pick-no">N = No</span> |
-            <span class="pick-over">O = Over</span> |
-            <span class="pick-under">U = Under</span>
-        </div>
-    `;
-
-    resultsContent.innerHTML = html;
+        return '<li class="log-entry' + (entry.system ? ' log-system' : '') + '">' +
+            escapeHtml(entry.text) +
+            '<span class="log-meta">' + escapeHtml(getDisplayName(entry.user)) + ' · ' + when + '</span>' +
+            '</li>';
+    }).join('');
 }
 
-// Show toast notification
+// ---------- Actions ----------
+
+async function confirmGate() {
+    state.gate.status = 'done';
+    state.gate.completedAt = new Date().toISOString();
+    state.gate.completedBy = loggedInUser;
+    addLog('Step 1 confirmed: Rohit said it, IRL. Milestones unlocked.', true);
+    render();
+    await saveState();
+    showToast('Step 1 confirmed. Milestones unlocked.', 'success');
+}
+
+async function undoGate() {
+    state.gate.status = 'pending';
+    state.gate.completedAt = null;
+    state.gate.completedBy = null;
+    addLog('Step 1 confirmation was undone (false alarm). Milestones re-locked.', true);
+    render();
+    await saveState();
+    showToast('Step 1 reset.', 'success');
+}
+
+async function setMilestoneStatus(index, status) {
+    const m = state.milestones[index];
+    if (!m || m.status === status) return;
+    m.status = status;
+    const name = m.title || ('Milestone ' + (index + 1));
+    addLog('"' + name + '" (' + m.points + ' pts) moved to ' + STATUS_LABELS[status] + '.', true);
+    render();
+    await saveState();
+}
+
+async function saveMilestoneEdit(index) {
+    const m = state.milestones[index];
+    if (!m) return;
+    const title = document.getElementById('editTitle').value.trim();
+    const desc = document.getElementById('editDesc').value.trim();
+    const changed = title !== m.title || desc !== m.description;
+    m.title = title;
+    m.description = desc;
+    editingIndex = null;
+    if (changed) {
+        addLog('Updated the details for "' + (title || 'Milestone ' + (index + 1)) + '" (' + m.points + ' pts).', true);
+    }
+    render();
+    if (changed) await saveState();
+}
+
+async function postLogUpdate(text) {
+    addLog(text, false);
+    renderLog();
+    await saveState();
+}
+
+// ---------- Events ----------
+
+function setupEventListeners() {
+    els.logoutBtn.addEventListener('click', () => {
+        sessionStorage.removeItem('loggedInUser');
+        window.location.href = 'login.html';
+    });
+
+    els.refreshBtn.addEventListener('click', async () => {
+        await loadState();
+        editingIndex = null;
+        render();
+        showToast(lastSyncSource === 'server' ? 'Up to date.' : 'Server unreachable — showing local copy.', lastSyncSource === 'server' ? 'success' : 'error');
+    });
+
+    els.milestones.addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-action]');
+        if (!btn) return;
+        const action = btn.dataset.action;
+        const index = parseInt(btn.dataset.index, 10);
+
+        if (action === 'set-status') {
+            setMilestoneStatus(index, btn.dataset.status);
+        } else if (action === 'edit') {
+            editingIndex = index;
+            renderMilestones();
+            const input = document.getElementById('editTitle');
+            if (input) input.focus();
+        } else if (action === 'save-edit') {
+            saveMilestoneEdit(index);
+        } else if (action === 'cancel-edit') {
+            editingIndex = null;
+            renderMilestones();
+        }
+    });
+
+    els.logForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const text = els.logInput.value.trim();
+        if (!text) return;
+        els.logInput.value = '';
+        postLogUpdate(text);
+    });
+
+    // Pull fresh state every 60s, unless someone is mid-edit or typing
+    setInterval(async () => {
+        const ae = document.activeElement;
+        const typing = ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA');
+        if (editingIndex !== null || typing) return;
+        await loadState();
+        render();
+    }, 60000);
+
+    // Keep the countdown honest
+    setInterval(renderStats, 60000);
+}
+
 function showToast(message, type) {
     const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
+    toast.className = 'toast ' + type;
     toast.textContent = message;
     document.body.appendChild(toast);
-
-    setTimeout(() => {
-        toast.remove();
-    }, 3000);
+    setTimeout(() => toast.remove(), 3000);
 }
 
-// Initialize when DOM is ready
+// ---------- Init ----------
+
+async function init() {
+    els.displayName.textContent = getDisplayName(loggedInUser);
+    setupEventListeners();
+    await loadState();
+    render();
+    setSyncStatus(lastSyncSource === 'local'
+        ? 'Server unreachable — showing the copy saved on this device'
+        : 'Connected · state is shared across everyone who logs in');
+}
+
 document.addEventListener('DOMContentLoaded', init);
